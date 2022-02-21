@@ -8,12 +8,12 @@ Asegúrese de tener [Node.js](http://nodejs.org/) instalado
 
 ```sh
 git clone https://github.com/kacoscorrosa/prueba-backend.git
-cd 01-api-rest
+cd prueba-backend
 npm install
-nodemon app
+node app
 ```
 
-Su aplicación ahora debería estar ejecutándose en [localhost:5000](http://localhost:8080/).
+Su aplicación ahora debería estar ejecutándose en [localhost:8080](http://localhost:8080/).
 
 ## Live Preview API
 

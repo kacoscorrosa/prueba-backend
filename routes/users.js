@@ -16,6 +16,7 @@ const router = Router();
 router.get('/', validateJWT, getUsers);
 
 router.put('/:id',[
+    validateJWT,
     check('id', 'Invalid ID').isMongoId(),
     check('id').custom( existeUserById ),
     validateFields
