@@ -116,11 +116,14 @@ const modifyTask = async (req, res = response) => {
     const { id } = req.params;
 
     let { name, priority, infoTask } = req.body;
-    name = name.toLowerCase();
 
     if (!name && !priority && !infoTask) {
 
         return res.status(400).json({})
+    }
+
+    if ( name ) {
+        name = name.toLowerCase();
     }
 
     const error = await prioritiesNotExist(priority);
