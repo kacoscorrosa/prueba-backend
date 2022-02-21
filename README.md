@@ -20,3 +20,10 @@ Su aplicación ahora debería estar ejecutándose en [localhost:5000](http://loc
 ```
 https://prueba-backend-katrina.herokuapp.com
 ```
+
+## View API Documentation
+
+```
+https://documenter.getpostman.com/view/18547643/UVkjxJ6T
+```
+
