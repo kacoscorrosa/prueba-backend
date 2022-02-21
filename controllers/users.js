@@ -1,52 +1,126 @@
-const { response, request } = require("express")
+const { response, request } = require("express");
+const bcryptjs = require('bcryptjs');
 
-const getUsers = (req = request, res = response) => {
+const User = require("../models/user");
 
-    const { q, nombre = 'no name', apikey, page, limit } = req.query;
+const getUsers = async (req = request, res = response) => {
 
-    res.status(200).json({
-        q,
-        nombre,
-        apikey,
-        page,
-        limit
-    })
+    const { limit = 5, from = 1 } = req.query;
+    const query = { state: true };
+
+    if (isNaN(+from) || +from < 1) {
+        return res.status(400).json({
+            msg: 'bad request - from must be an integer stating from 1'
+        });
+    }
+
+    if (isNaN(+limit) || +limit < 1) {
+        return res.status(400).json({
+            msg: 'bad request - limit must be an integer stating from 1'
+        });
+    }
+
+    try {
+
+        const [total, users] = await Promise.all([
+            User.countDocuments(query),
+            User.find(query)
+                .skip(Number(from - 1))
+                .limit(Number(limit))
+        ])
+
+        res.json({
+            total,
+            users
+        });
+
+    } catch (error) {
+
+        console.log(error);
+        res.status(500).json({
+            msg: 'Unexpected error',
+            error: error.error,
+        })
+    }
 }
 
-const updateUsers = (req, res = response) => {
+const createUser = async (req, res = response) => {
+
+    const { name, email, password } = req.body;
+    const user = new User({ name, email, password });
+
+    const salt = bcryptjs.genSaltSync();
+    user.password = bcryptjs.hashSync(password, salt);
+
+    try {
+
+        await user.save();
+
+        res.json({
+            user
+        });
+
+    } catch (error) {
+
+        console.log(error);
+        res.status(409).json({
+            msg: 'Unexpected error',
+            error: error.error,
+        })
+    }
+}
+
+const updateUser = async (req, res = response) => {
+
+    const { id } = req.params;
+    const { _id, password, email, ...resto } = req.body;
+
+    if (password) {
+        const salt = bcryptjs.genSaltSync();
+        resto.password = bcryptjs.hashSync(password, salt);
+    }
+
+    try {
+
+        const user = await User.findByIdAndUpdate(id, resto, { new: true });
+
+        res.json(user);
+
+    } catch (error) {
+
+        console.log(error);
+        res.status(409).json({
+            msg: 'Unexpected error',
+            error: error.error,
+        })
+    }
+}
+
+const deleteUser = async (req, res = response) => {
 
     const { id } = req.params;
 
-    res.json({
-        id
-    })
-}
+    try {
 
-const createUsers = (req, res = response) => {
+        const user = await User.findByIdAndUpdate(id, { state: false });
 
-    const body = req.body;
+        res.json({
+            user
+        });
 
-    res.json({
-        body
-    })
-}
+    } catch (error) {
 
-const patchUsers = (req, res = response) => {
-    res.status(200).json({
-        msg: 'patch API'
-    })
-}
-
-const deleteUsers = (req, res = response) => {
-    res.status(200).json({
-        msg: 'delete API'
-    })
+        console.log(error);
+        res.status(409).json({
+            msg: 'Unexpected error',
+            error: error.error,
+        })
+    }
 }
 
 module.exports = {
     getUsers,
-    updateUsers,
-    createUsers,
-    patchUsers,
-    deleteUsers
+    createUser,
+    updateUser,
+    deleteUser
 }
